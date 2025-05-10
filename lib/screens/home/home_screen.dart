@@ -1,6 +1,10 @@
+import 'package:absensi_ui/providers/auth/auth_provider.dart';
+import 'package:absensi_ui/providers/me/me_provider.dart';
 import 'package:absensi_ui/style/color/colors.dart';
-import 'package:absensi_ui/widget/card/card_widget.dart';
+import 'package:absensi_ui/utils/me_result_state.dart';
+import 'package:absensi_ui/widgets/card/card_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,23 +15,36 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<MeProvider>(context, listen: false).getMe();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: primaryLight,
-        title: const Text(
+        title: Text(
           "Dashboard",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(fontWeight: FontWeight.bold, color: whiteC),
         ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.white,
-              radius: 16,
-              child: Icon(Icons.person, color: primaryColor, size: 20),
+            child: IconButton(
+              onPressed: () {
+                final authProvider = Provider.of<AuthProvider>(
+                  context,
+                  listen: false,
+                );
+                authProvider.logout(context);
+              },
+              icon: Icon(Icons.logout),
             ),
           ),
         ],
@@ -35,7 +52,6 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Bagian profil singkat di bagian atas
             Container(
               padding: const EdgeInsets.fromLTRB(20, 10, 20, 25),
               decoration: BoxDecoration(
@@ -49,95 +65,76 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   CircleAvatar(
                     radius: 30,
-                    backgroundColor: Colors.white,
+                    backgroundColor: whiteC,
                     child: Icon(Icons.person, color: primaryColor, size: 36),
                   ),
                   const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Selamat Pagi,",
-                        style: TextStyle(color: Colors.white70, fontSize: 14),
-                      ),
-                      const Text(
-                        "Ahmad Karyawan",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Text(
-                          "Staf IT",
-                          style: TextStyle(color: Colors.white, fontSize: 12),
-                        ),
-                      ),
-                    ],
+                  Consumer<MeProvider>(
+                    builder: (context, provider, _) {
+                      final state = provider.resultState;
+                      if (state is MeLoadedState) {
+                        final karyawan = state.me.karyawan;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Selamat Pagi,",
+                              style: TextStyle(color: white70, fontSize: 14),
+                            ),
+                            Text(
+                              karyawan.namaKaryawan,
+                              style: TextStyle(
+                                color: whiteC,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: whiteWp02,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                karyawan.jabatan.namaJabatan,
+                                style: TextStyle(color: whiteC, fontSize: 12),
+                              ),
+                            ),
+                          ],
+                        );
+                      } else if (state is MeLoadingState) {
+                        return CircularProgressIndicator();
+                      } else if (state is MeErrorState) {
+                        return Text(
+                          "Gagal memuat data",
+                          style: TextStyle(color: whiteC),
+                        );
+                      } else {
+                        return SizedBox.shrink();
+                      }
+                    },
                   ),
                 ],
               ),
             ),
 
-            // Padding konten utama
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Kartu shift saat ini
                   const CardWidget(),
-
                   const SizedBox(height: 24.0),
-
-                  // Bagian Ringkasan Kehadiran
-                  // Container(
-                  //   padding: const EdgeInsets.all(16),
-                  //   decoration: BoxDecoration(
-                  //     color: Colors.white,
-                  //     borderRadius: BorderRadius.circular(16),
-                  //     boxShadow: [
-                  //       BoxShadow(
-                  //         color: Colors.black.withOpacity(0.05),
-                  //         blurRadius: 10,
-                  //         offset: const Offset(0, 4),
-                  //       ),
-                  //     ],
-                  //   ),
-                  //   child: Row(
-                  //     mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  //     children: [
-                  //       _buildSummaryItem("Hadir", "24", Colors.green),
-                  //       _buildSummaryItem("Izin", "2", Colors.orange),
-                  //       _buildSummaryItem("Sakit", "1", Colors.blue),
-                  //       _buildSummaryItem("Alfa", "0", Colors.red),
-                  //     ],
-                  //   ),
-                  // ),
-
-                  // const SizedBox(height: 24.0),
-
-                  // Header jadwal absensi
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
                         children: [
-                          Icon(
-                            Icons.event_note,
-                            color: Colors.blue.shade700,
-                            size: 22,
-                          ),
+                          Icon(Icons.event_note, color: blueshade700, size: 22),
                           const SizedBox(width: 8),
                           const Text(
                             "Jadwal Absensi",
@@ -154,21 +151,21 @@ class _HomeScreenState extends State<HomeScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
+                          color: blueshade50,
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: Row(
                           children: [
                             Icon(
                               Icons.calendar_month,
-                              color: Colors.blue.shade700,
+                              color: blueshade700,
                               size: 14,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               "Mei 2025",
                               style: TextStyle(
-                                color: Colors.blue.shade700,
+                                color: blueshade700,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
                               ),
@@ -180,14 +177,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
 
                   const SizedBox(height: 16.0),
-
-                  // Daftar jadwal absensi
                   ListView.builder(
                     itemCount: 3,
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     itemBuilder: (BuildContext context, int index) {
-                      // Data dummy untuk contoh visual
                       final List<Map<String, dynamic>> scheduleData = [
                         {
                           'date': '25 Mei 2025',
@@ -217,11 +211,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: whiteC,
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
+                              color: blackWP05,
                               blurRadius: 5,
                               offset: const Offset(0, 2),
                             ),
@@ -255,14 +249,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               Icon(
                                 Icons.access_time,
                                 size: 14,
-                                color: Colors.grey.shade600,
+                                color: greyShape700,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 schedule['time'],
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: Colors.grey.shade700,
+                                  color: greyShape700,
                                 ),
                               ),
                             ],
@@ -292,19 +286,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 16),
 
-                  // Tombol lihat semua jadwal
                   Center(
                     child: TextButton.icon(
                       onPressed: () {},
                       icon: Icon(
                         Icons.calendar_view_week,
                         size: 18,
-                        color: Colors.blue.shade700,
+                        color: blueshade700,
                       ),
                       label: Text(
                         "Lihat Semua Jadwal",
                         style: TextStyle(
-                          color: Colors.blue.shade700,
+                          color: blueshade700,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -316,35 +309,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildSummaryItem(String title, String count, Color color) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(Icons.check_circle_outline, color: color, size: 24),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          count,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-            color: color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          title,
-          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-        ),
-      ],
     );
   }
 }

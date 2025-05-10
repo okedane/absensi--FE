@@ -7,10 +7,8 @@ class CardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Stack(
         children: [
-          // Background container dengan gradient
           Container(
             height: 195,
             width: MediaQuery.of(context).size.width,
@@ -23,7 +21,6 @@ class CardWidget extends StatelessWidget {
               borderRadius: BorderRadius.all(Radius.circular(16.0)),
               boxShadow: [
                 BoxShadow(
-                  // ignore: deprecated_member_use
                   color: Colors.black.withOpacity(0.2),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
@@ -32,7 +29,6 @@ class CardWidget extends StatelessWidget {
             ),
           ),
 
-          // Elemen dekoratif
           Positioned(
             top: -15,
             right: -15,
@@ -46,13 +42,11 @@ class CardWidget extends StatelessWidget {
             ),
           ),
 
-          // Konten utama
           Padding(
             padding: EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header dengan shift dan tanggal
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -87,7 +81,6 @@ class CardWidget extends StatelessWidget {
                   ],
                 ),
 
-                // Tampilan waktu
                 const SizedBox(height: 20.0),
                 Center(
                   child: Container(
@@ -122,11 +115,9 @@ class CardWidget extends StatelessWidget {
                   ),
                 ),
 
-                // Divider
                 const SizedBox(height: 16.0),
                 Divider(color: Colors.white.withOpacity(0.3), thickness: 1),
 
-                // Status kehadiran
                 const SizedBox(height: 8.0),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
